@@ -1,0 +1,225 @@
+class Binary_Search_Tree:
+
+  class __BST_Node:
+
+    def __init__(self, value):
+      self.height = 1 
+      self.value = value
+      self.left_child = None
+      self.right_child = None
+
+  def __init__(self):
+    self.__root = None
+
+  def calculate_balance(self, t):
+    if t.left_child == None and t.right_child != None:
+      return t.right_child.height
+    elif t.right_child == None and t.left_child != None:
+      return 0-t.left_child.height
+    elif t.right_child != None and t.left_child != None:
+      return t.right_child.height - t.left_child.height
+      
+
+  def __balance(self, t):
+    if t == None:
+      return t
+    elif t.left_child == None and t.right_child == None: 
+      return t 
+    # elif t.left_child != None:
+    elif self.calculate_balance(t) == -2:
+      if self.calculate_balance(t.left_child) == -1 or self.calculate_balance(t.left_child) == 0: #Right-Right
+        floater = t.left_child.right_child
+        z = t 
+        y = t.left_child
+        x = t.left_child.left_child
+        #single rotation to the right
+        if y.right_child == None:
+          y.right_child = z
+          z.left_child = None
+          t = y
+        else:
+          t = y
+          t.right_child = z
+          t.left_child = x
+          t.right_child.left_child = floater
+        t.height = self.get_height()
+        return t
+        
+      elif self.calculate_balance(t.left_child) == 1:  #Left-Right
+        z = t
+        y = t.left_child
+        x = t.right_child.right_child
+        y.right_child = x.left_child
+        x.left_child = y
+        z.left_child = x.right_child
+        x.right_child = z
+        t = x
+        t.height = self.get_height()
+        return t
+
+    elif self.calculate_balance(t) == 2:
+      if self.calculate_balance(t.right_child) == 1 or self.calculate_balance(t.right_child) == 0: #Left-Left
+        floater = t.right_child.right_child
+        z = t
+        y = t.right_child
+        x = t.right_child.right_child
+        if y.left_child == None:
+          y.left_child = z
+          z.right_child = None
+          t = y
+        else:
+          t.left_child = z
+          t.right_child = x
+          t.left_child.right_child = floater 
+        t.height = self.get_height()
+        return t
+
+      elif self.calculate_balance(t.right_child) == -1: #Right-Left
+        z = t
+        y = t.right_child
+        x = t.right_child.left_child
+        #rotation 1 - to the left
+        y.left_child = x.right_child
+        x.right_child = y
+        z.right_child = x.left_child
+        x.left_child = z
+        t = x
+        t.height = self.get_height()
+        return t
+    else: #when balance is -1, +1, or 0
+      return t
+
+  def insert_element(self, value):
+  	self.__root = self.__rins(self.__root, value) 
+
+  def __rins(self, t, x):
+    if t == None:
+      t = Binary_Search_Tree.__BST_Node(x)
+      return t
+    elif x == t.value:
+      raise ValueError
+    elif x < t.value:
+      t.left_child = self.__rins(t.left_child, x)
+      if t.right_child == None: 
+        t.height += 1
+    elif x > t.value:
+      t.right_child = self.__rins(t.right_child, x)
+      if t.left_child == None: 
+        t.height += 1
+    return self.__balance(t)
+
+  def remove_element(self, value):
+    self.__root = self.__r_remove(self.__root, value)
+
+  def __r_remove(self, t, x):
+    if t == None:
+      raise ValueError
+    if t.value == x:
+      if t.left_child == None and t.right_child == None:
+      	t.height -= 1
+      	return None
+      elif t.left_child == None and t.right_child != None:
+      	t.height -= 1
+      	return t.right_child
+      elif t.left_child != None and t.right_child == None:
+      	t.height -= 1
+      	return t.left_child
+      elif t.left_child != None and t.right_child != None:
+        m = self.__min(t)
+        t.value = m
+        t.right_child = self.__r_remove(t.right_child, m)
+        t.height -= 1
+    elif x < t.value:
+      t.left_child = self.__r_remove(t.left_child, x)
+      t.height -= 1
+    elif x > t.value:
+      t.right_child = self.__r_remove(t.right_child, x)
+      t.height -= 1
+    return self.__balance(t)
+
+  def __min(self, t):
+    temp = t.right_child
+    while temp.left_child != None:
+      temp = temp.left_child
+    return temp.value
+
+  def to_list(self):
+    if self.__root == None:
+      output = []
+    else:
+      output = []
+      output +=  [self.__rto_list(self.__root)]
+      output = output[0].split()
+    return output
+
+  def __rto_list(self, t):
+    if t == None:
+      return ' '
+    return self.__rto_list(t.left_child) + str(t.value)  + self.__rto_list(t.right_child)
+
+  def in_order(self):
+    if self.__root == None:
+      output = '['
+      output += ']'
+    else:
+      output = '['
+      output += self.__rin_order(self.__root)
+      output = output[:-2]
+      output += ' ]'
+    return output
+    
+  def __rin_order(self, t):
+    if t == None:
+      return ' '
+    return self.__rin_order(t.left_child) + str(t.value) + ',' + self.__rin_order(t.right_child)
+
+  def pre_order(self):
+    if self.__root == None:
+      output = '['
+      output += ' ]'
+    else:
+      output = '[ '
+      output += self.__rpre_order(self.__root)
+      output = output[:-2]
+      output += ' ]'
+    return output
+
+  def __rpre_order(self, t):
+    if t == None:
+      return ''
+    return str(t.value) + ', ' + self.__rpre_order(t.left_child) + self.__rpre_order(t.right_child)
+
+  def post_order(self):
+    if self.__root == None:
+      output = '['
+      output += ' ]'
+    else:
+      output = '[ '
+      output += self.__rpost_order(self.__root)
+      output = output[:-2]
+      output += ' ]'
+    return output
+    
+  def __rpost_order(self, t):
+    if t == None:
+      return ''
+    return  self.__rpost_order(t.left_child) + self.__rpost_order(t.right_child) + str(t.value) + ', ' 
+
+  def get_height(self):
+  	if self.__root == None:
+  	  return 0
+  	elif self.__root.left_child == None and self.__root.right_child == None:
+  	  return 1
+  	elif self.__root.left_child == None and self.__root.right_child != None:
+  	  return 1 + self.__root.right_child.height
+  	elif self.__root.right_child == None and self.__root.left_child != None:
+  	  return 1 + self.__root.left_child.height
+  	else:
+  	  return 1 + max(self.__root.left_child.height, self.__root.right_child.height)
+    
+  def __str__(self):
+    return self.in_order()
+
+if __name__ == '__main__':
+  pass 
+
